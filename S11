@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>اختبار S11</title>
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      font-family: Arial, sans-serif;
+      background-color: #f0f0f0;
+      direction: rtl;
+      flex-direction: column;
+    }
+    #best-time {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    #worst-time {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      font-size: 18px;
+      font-weight: bold;
+    }
+    #attempts {
+      position: absolute;
+      top: 10px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 18px;
+      font-weight: bold;
+    }
+    #reaction-button {
+      width: 150px;
+      height: 150px;
+      border-radius: 50%;
+      border: none;
+      font-size: 18px;
+      cursor: pointer;
+      background-color: red;
+      color: white;
+    }
+    #result {
+      margin-top: 20px;
+      font-size: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div id="best-time">أفضل نتيجة: ...</div>
+  <div id="worst-time">أبطأ نتيجة: ...</div>
+  <div id="attempts">المحاولة: 0</div>
+
+  <button id="reaction-button">اضغط لبدء</button>
+  <div id="result"></div>
+
+  <script>
+    const button = document.getElementById("reaction-button");
+    const resultDiv = document.getElementById("result");
+    const bestTimeDiv = document.getElementById("best-time");
+    const worstTimeDiv = document.getElementById("worst-time");
+    const attemptsDiv = document.getElementById("attempts");
+
+    let startTime;
+    let timeoutId;
+    let bestTime = localStorage.getItem("bestTime") || null;
+    let worstTime = localStorage.getItem("worstTime") || null;
+    let attempts = 0;
+
+    function updateDisplays() {
+      bestTimeDiv.textContent = bestTime !== null ? "أفضل نتيجة: " + bestTime + " مللي ثانية" : "أفضل نتيجة: ...";
+      worstTimeDiv.textContent = worstTime !== null ? "أبطأ نتيجة: " + worstTime + " مللي ثانية" : "أبطأ نتيجة: ...";
+      attemptsDiv.textContent = "المحاولة: " + attempts;
+    }
+
+    updateDisplays();
+
+    button.addEventListener("click", () => {
+      if (button.textContent === "اضغط لبدء") {
+        button.style.backgroundColor = "red";
+        resultDiv.textContent = "";
+        button.textContent = "انتظر...";
+
+        // الوقت العشوائي بين 1 و 3 ثواني
+        timeoutId = setTimeout(() => {
+          button.style.backgroundColor = "green";
+          button.textContent = "اضغط الآن!";
+          startTime = Date.now();
+        }, Math.random() * 2000 + 1000);
+
+      } else if (button.textContent === "اضغط الآن!") {
+        const reactionTime = Date.now() - startTime;
+        resultDiv.textContent = "وقتك: " + reactionTime + " مللي ثانية";
+
+        attempts++; // زيادة عداد المحاولات
+
+        // تحديث أفضل نتيجة
+        if (bestTime === null || reactionTime < bestTime) {
+          bestTime = reactionTime;
+          localStorage.setItem("bestTime", bestTime);
+        }
+
+        // تحديث أبطأ نتيجة
+        if (worstTime === null || reactionTime > worstTime) {
+          worstTime = reactionTime;
+          localStorage.setItem("worstTime", worstTime);
+        }
+
+        updateDisplays();
+        button.textContent = "اضغط لبدء";
+        button.style.backgroundColor = "red";
+
+      } else {
+        clearTimeout(timeoutId);
+        button.textContent = "اضغط لبدء";
+        button.style.backgroundColor = "red";
+        resultDiv.textContent = "";
+      }
+    });
+  </script>
+</body>
+</html>
